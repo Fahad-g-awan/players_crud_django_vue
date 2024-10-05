@@ -1,0 +1,47 @@
+# Python virtual environment
+venv/
+
+# Byte-compiled files
+psl/__pycache__/
+psl/*.py[cod]
+
+# Django stuff:
+psl/*.log
+psl/*.sqlite3
+
+# IDE or editor files
+psl/*.idea/
+psl/*.vscode/
+
+
+# frotnend
+# Logs
+frotnend/logs
+frotnend/*.log
+frotnend/npm-debug.log*
+frotnend/yarn-debug.log*
+frotnend/yarn-error.log*
+frotnend/pnpm-debug.log*
+frotnend/lerna-debug.log*
+
+frotnend/node_modules
+frotnend/.DS_Store
+frotnend/dist
+frotnend/dist-ssr
+frotnend/coverage
+frotnend/*.local
+
+frotnend/cypress/videos/
+frotnend/cypress/screenshots/
+
+# Editor directories and files
+frotnend/.vscode/*
+frotnend/!.vscode/extensions.json
+frotnend/.idea
+frotnend/*.suo
+frotnend/*.ntvs*
+frotnend/*.njsproj
+frotnend/*.sln
+frotnend/*.sw?
+
+frotnend/*.tsbuildinfo
