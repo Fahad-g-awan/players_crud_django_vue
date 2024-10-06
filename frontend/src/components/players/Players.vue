@@ -1,27 +1,41 @@
 <script setup>
+import { useRoute, useRouter } from "vue-router";
 import { onMounted, ref } from "vue";
+
+// Icons
 import { PenLine, Trash2 } from "lucide-vue-next";
+
+// Custom imports
 import {
   deletePlayers,
   fetchPlayers,
 } from "../../utils/composabels/playersApi.js";
-import { useRoute, useRouter } from "vue-router";
 
+// Reactive states
 const errorMessage = ref(null);
 const message = ref(null);
 
-const { data, error: fetchError, load } = fetchPlayers();
+// Hooks
 const { deletePlayer, error: deleteError } = deletePlayers();
-
+const { data, error: fetchError, load } = fetchPlayers();
 const router = useRouter();
 const route = useRoute();
 
+/**
+ * Function to redirect user to update page for the specific selected team
+ *
+ * @param {string} team - Player team name
+ */
 const handleUpdate = (team) => {
   router.push("/update-players/" + team);
 };
 
+/**
+ * Functio to handle player delete operations
+ *
+ * @param {String} playerId - Id of the player which will be deleted
+ */
 const handleDeletePlayer = async (playerId) => {
-  console.log("handleDeletePlayer", playerId);
   if (playerId) {
     let resOk = await deletePlayer({ id: playerId });
 
@@ -36,10 +50,11 @@ const handleDeletePlayer = async (playerId) => {
   }
 };
 
+/**
+ * Get players data whwn component is mounted
+ */
 onMounted(async () => {
-  console.log("Mounted");
   await load();
-  console.log("data", data.value);
 
   if (data.value) {
     localStorage.setItem("players", JSON.stringify(data.value));

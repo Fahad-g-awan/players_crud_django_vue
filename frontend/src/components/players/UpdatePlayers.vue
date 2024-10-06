@@ -1,57 +1,27 @@
 <script setup>
-import { ref } from "vue";
+import { onMounted, onUpdated, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-// Icons
-import { X, Plus } from "lucide-vue-next";
-
-// Custom imports
-import { addPlayers } from "@/utils/composabels/playersApi";
-
-// Initial values for states
-const defaultPlayer = {
-  team_name: "",
-  username: "",
-  name: "",
-  email: "",
-};
+// Cutom imports
+import { updatePlayers } from "@/utils/composabels/playersApi";
 
 // Reactive states
-const players = ref([{ ...defaultPlayer }]);
+const teamParam = ref(null);
 const message = ref(null);
+const players = ref([]);
 const error = ref(null);
 const team = ref("");
 
 // Hooks
-const { data: newData, error: addPlayerError, add } = addPlayers();
+const { data: newData, error: updatePlayerError, update } = updatePlayers();
+const router = useRouter();
+const route = useRoute();
 
 /**
- * Function to add new player data
- */
-const handleAddPlayer = () => {
-  players.value.push({ ...defaultPlayer });
-};
-
-/**
- * Function to remove added player
- *
- * @param {Number} index - Index of the player which will be removed
- */
-const handleRemovePlayer = (index) => {
-  players.value = players.value.filter((player, i) => i != index);
-};
-
-/**
- * Function to handle submit new added players after validations
+ * Function to handle players update
  */
 const handleSubmit = async () => {
   // Validations
-  if (!team.value.trim()) {
-    error.value = `Please add team name`;
-    return;
-  } else {
-    error.value = null;
-  }
-
   for (let index = 0; index < players.value.length; index++) {
     let player = players.value[index];
 
@@ -72,59 +42,78 @@ const handleSubmit = async () => {
   if (error.value) {
     return;
   } else {
+    error.value = null;
     let payload = [];
 
     players.value.forEach((player, index) => {
-      player.team_name = team;
+      let p = {
+        id: player.id,
+        teamName: teamParam.value,
+        name: player.name,
+        username: player.username,
+        email: player.email,
+      };
       payload.push(player);
     });
 
     if (payload.length > 0) {
-      let resOk = await add({ players: payload });
+      let resOk = await update({ players: payload });
 
       if (resOk) {
-        message.value = "Players added successfully";
-        players.value = [{ ...defaultPlayer }];
+        message.value = "Players updated successfully";
       }
     } else {
       error.value = "Something went wrong";
     }
   }
 
-  if (addPlayerError) {
-    error.value = addPlayerError;
+  if (updatePlayerError) {
+    error.value = updatePlayerError;
   }
 };
+
+/**
+ * Get players data whwn component is mounted
+ */
+onMounted(() => {
+  let p = JSON.parse(localStorage.getItem("players"));
+
+  if (!p) {
+    router.push("/");
+  } else {
+    teamParam.value = route.params.team;
+    players.value = p[teamParam.value];
+  }
+});
+
+/**
+ * Perform operations when states are updated
+ */
+onUpdated(() => {
+  console.log("team", team.value);
+  console.log("players", players.value);
+});
 </script>
 
 <template>
   <div class="flex flex-col items-center justify-center">
     <h1 class="text-lg font-bold text-gray-700 tracking-wider my-10">
-      Add Players
+      Update Players
     </h1>
 
     <div class="bg-white shadow-lg py-7 px-5 rounded-xl w-[80dvw] mb-10">
       <!-- Add team name -->
       <div>
         <input
-          v-model="team"
+          :value="teamParam"
           type="text"
           placeholder="Team Name"
-          class="w-full border border-gray-400 focus-within:border-gray-600 outline-none px-3 py-2 rounded-lg text-gray-500"
+          class="w-full border border-gray-400 focus-within:border-gray-600 outline-none px-3 py-2 rounded-lg text-gray-500 pointer-events-none opacity-80"
         />
       </div>
 
       <!-- Add players -->
       <div class="w-full mt-10 flex flex-col items-center justify-center gap-5">
-        <!-- Add new row for player button -->
-        <div
-          @click="handleAddPlayer"
-          class="flex items-center justify-center self-end mb-5 text-sm gap-2 px-3 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-all duration-300 cursor-pointer text-gray-800 hover:text-gray-700"
-        >
-          <Plus class="size-5" />
-          <span>Add Row</span>
-        </div>
-
         <!-- Add new players input fields -->
         <div
           v-for="(player, index) in players"
@@ -152,12 +141,6 @@ const handleSubmit = async () => {
             class="w-full border border-gray-400 focus-within:border-gray-600 outline-none px-3 py-2 rounded-lg text-gray-500"
             required
           />
-          <div>
-            <X
-              @click="handleRemovePlayer(index)"
-              class="text-red-500 hover:text-red-700 transition-all duration-300 cursor-pointer"
-            />
-          </div>
         </div>
 
         <div v-if="error" class="text-sm text-red-500">{{ error }}</div>

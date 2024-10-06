@@ -70,9 +70,8 @@ export const deletePlayers = () => {
 
   const deletePlayer = async (payload) => {
     try {
-      console.log("payload", payload);
       const response = await api.delete("/players", { data: payload });
-      console.log("Ipdate players API esponse:", response.data);
+      console.log("Update players API esponse:", response.data);
 
       data.value = response.data;
       return true;
